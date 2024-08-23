@@ -11,6 +11,9 @@ public class ReservaModel {
     private String cliente;
     private int reservaFlag;
 
+    public ReservaModel() {
+    }
+
     public ReservaModel(int reservaId, String habitacionId, Date inicio, Date termino, String cliente, int reservaFlag) {
         this.reservaId = reservaId;
         this.habitacionId = habitacionId;

@@ -8,6 +8,9 @@ public class HabitacionModel {
     private int camas;
     private String observacion;
 
+    public HabitacionModel() {
+    }
+
     public HabitacionModel(int id, String habitacionNumero, int piso, int camas, String observacion) {
         this.id = id;
         this.habitacionNumero = habitacionNumero;
