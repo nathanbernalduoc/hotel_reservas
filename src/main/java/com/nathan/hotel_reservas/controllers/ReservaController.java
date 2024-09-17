@@ -2,39 +2,32 @@ package com.nathan.hotel_reservas.controllers;
 
 import java.sql.Date;
 import java.util.List;
-
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nathan.hotel_reservas.models.HabitacionModel;
 import com.nathan.hotel_reservas.models.ReservaModel;
 import com.nathan.hotel_reservas.models.ResultModel;
+import com.nathan.hotel_reservas.service.HabitacionService;
+import com.nathan.hotel_reservas.service.ReservaService;
 
 @RestController
 public class ReservaController {
 
-    private List<HabitacionModel> habitacion = new ArrayList<>();
-    private List<ReservaModel> reservas = new ArrayList<>();
-
-
-    public ReservaController() {
-        habitacion.add(new HabitacionModel(1, "A01", 1, 3, "Test #1"));
-        habitacion.add(new HabitacionModel(2, "A02", 1, 1, "Test #2"));
-        habitacion.add(new HabitacionModel(3, "B01", 2, 2, "Test #3"));
-        habitacion.add(new HabitacionModel(4, "B02", 2, 3, "Test #4"));
-        habitacion.add(new HabitacionModel(5, "C01", 3, 4, "Full"));
-    }
-
-    /*
-     * Functions
-     */
+    @Autowired
+    private HabitacionService habitacionService;
+    @Autowired
+    private ReservaService reservaService;
 
     private Boolean checkFecha(Date inicio, Date termino) {
         return !inicio.after(termino);
@@ -42,6 +35,7 @@ public class ReservaController {
 
     private String checkReserva(String habitacionNumero, Date inicio, Date termino) {
         String habitacionId = "";
+        List<ReservaModel> reservas = reservaService.getAllReserva();
         for(ReservaModel reserva:  reservas) {
             System.out.println("Habi "+reserva.getHabitacionId());
             if (reserva.getHabitacionId().equals(habitacionNumero))  {
@@ -60,52 +54,38 @@ public class ReservaController {
     }
 
     private HabitacionModel checkHabitacion(String habitacionNumero) {
-        HabitacionModel habitacion = new HabitacionModel();
-        for(HabitacionModel hab: this.habitacion) {
+        HabitacionModel habitacion = null;
+        List<HabitacionModel> habitaciones = habitacionService.getAllHabitacion();
+        for(HabitacionModel hab: habitaciones) {
+            System.out.println("COMPARANDO "+hab.getHabitacionNumero()+" "+habitacionNumero);
             if (hab.getHabitacionNumero().equals(habitacionNumero)) {
                 habitacion = hab;
             }
         }
+        System.out.println(habitacion);
         return habitacion;
     }
 
-private Boolean checkReservasLen() {
-        return (reservas.size()>0);
-    }
-
-    private ReservaModel getReservaById(int reservaId) {
-        ReservaModel reserva = new ReservaModel();
-        for(ReservaModel r: reservas) {
-            if (r.getReservaId() == reservaId) {
-                reserva = r;
-            }
-        }
-        return reserva;
-    }
-
-    /*
-     * APIs
-     */
-
-    @GetMapping({"/habitacion/add", "/habitacion/add/"})
-    public ResultModel addHabitacion(@RequestParam("habitacionNumero") String habitacionNumero, @RequestParam("piso") int piso, @RequestParam("camas") int camas, @RequestParam("observacion") String observacion) {
-        ResultModel result = new ResultModel("error", "La habitación "+habitacionNumero+" referenciada ya existe.");
-        if (checkHabitacion(habitacionNumero).getId() == 0) {
-            this.habitacion.add(new HabitacionModel(habitacion.size()+1, habitacionNumero, piso, camas, observacion));
-            result = new ResultModel("success", "Nueva "+habitacion.size()+" habitación.");
+    @PostMapping({"/habitacion/add", "/habitacion/add/"})
+    public ResultModel addHabitacion(@RequestBody HabitacionModel habitacion) {
+        ResultModel result = new ResultModel("error", "La habitación referenciada ya existe.");
+        System.out.println("Habitacion recibida "+habitacion.getHabitacionNumero());
+        if (checkHabitacion(habitacion.getHabitacionNumero()) == null) {
+            habitacionService.createHabitacion(habitacion);
+            result = new ResultModel("success", "Nueva habitación "+habitacion.getHabitacionNumero()+" creada con éxito.");
         }
         return result;
         
     }
 
     @GetMapping("/habitacion/unset/{id}")
-    public ResultModel addHabitacion(@PathVariable int id) {
+    public ResultModel addHabitacion(@PathVariable Long id) {
 
         Boolean sw = false;
-
+        List<HabitacionModel> habitacion = habitacionService.getAllHabitacion();
         for (HabitacionModel h: habitacion) {
             if (h.getId() == id) {
-                habitacion.remove(h);
+                habitacionService.deleteHabitacion(id);
                 sw = true;
                 break;
             }
@@ -121,53 +101,78 @@ private Boolean checkReservasLen() {
 
     @GetMapping("/habitacion/list")
     public List<HabitacionModel> listHabitacion() {
-        return habitacion;
+        return habitacionService.getAllHabitacion();
     }
 
-    @GetMapping({"/reserva/reservar/", "/reserva/reservar"})
-    public ResultModel setReserva(@RequestParam("habitacionNumero") String habitacionNumero, @RequestParam("inicio") Date inicio, @RequestParam("termino") Date termino, @RequestParam("cliente") String cliente) {
+    @PostMapping("/reserva/reservar")
+    public ResultModel setReserva(@RequestBody ReservaModel reserva) {
         ResultModel result = new ResultModel("success", "Reserva registrada con éxito.");
         Boolean sw = true;
+        System.out.println("Habitacion recibida "+reserva.getHabitacionId());
         // validar habitación referenciada
-        if (checkHabitacion(habitacionNumero).getId() == 0) {
+        if (checkHabitacion(reserva.getHabitacionId()) == null) {
             result = new ResultModel("error", "La habitación referenciada no existe.");
+            System.out.print("VALIDACOÓN DE HABITACION REALIZADA");
             sw = false;
-        } else if (!checkFecha(inicio, termino)) {
+        } else if (!checkFecha(reserva.getInicio(), reserva.getTermino())) {
             result = new ResultModel("error", "La fecha de inicio no puede ser posterior a la fecha de término.");
+            System.out.print("VALIDACOÓN DE FECHAS REALIZADA");
             sw = false;
         } else {
             // validar disponibldad de reserva
-            if (!checkReserva(habitacionNumero, inicio, termino).equals("")) {
+            if (!checkReserva(reserva.getHabitacionId(), reserva.getInicio(), reserva.getTermino()).equals("")) {
                 result = new ResultModel("error", "Fecha referenciada no disponible.");
+                System.out.print("VALIDACOÓN DE FECHAS DISPONIBILDAD REALIZADA");
                 sw = false;
             }
         }
 
         if (sw) {
-            reservas.add(new ReservaModel(reservas.size()+1, habitacionNumero, inicio, termino, cliente, 1));
+            reservaService.createReserva(reserva);
         }
         return result;
     }
 
     @GetMapping("/reserva/list")
-    public List<ReservaModel> anularReserva() {
-        return reservas;
+    public List<ReservaModel> getReservaList() {
+        return reservaService.getAllReserva();
     }
 
-    @GetMapping("/reserva/anular/{id}")
-    public ResultModel anularReserva(@PathVariable int id) {
-        ResultModel result = new ResultModel("success",  "Reserva "+id+" anulada correctamente");
-        if (!checkReservasLen()) {
-            result = new ResultModel("error", "No hay reservas vigentes.");
-        } else {
-            ReservaModel reserva = getReservaById(id);
-            if (reserva.getReservaId() == 0) {
-                result = new ResultModel("error", "No se encuentra ninguna reserva con el identificador especificado.");
-            } else {
-                reservas.remove(reserva);
+    @DeleteMapping("/reserva/anular/{id}")
+    public ResultModel anularReserva(@PathVariable Long id) {
+        ResultModel result = new ResultModel("success", "Reserva anulada correctamente.");
+        int sw = 0;
+        for(ReservaModel r: reservaService.getAllReserva()) {
+            if (r.getReservaId().equals(id)) {
+                sw = 1;
             }
         }
+        if (sw == 1) {
+            reservaService.deleteReserva(id);
+        } else {
+            result = new ResultModel("error", "La reserva especificada no existe");
+        }
         return result;
+    }
+
+    @GetMapping({"/reserva/disponibilidad", "/reserva/disponibilidad/"})
+    public List<HabitacionModel> getDisponibilidad() {
+        List<HabitacionModel> habitaciones = habitacionService.getAllHabitacion();
+        List<HabitacionModel> disponible = new ArrayList<HabitacionModel>();
+        List<ReservaModel> reservas = reservaService.getAllReserva();
+        for(HabitacionModel h: habitaciones) {
+            int sw = 0;
+            for(ReservaModel r: reservas) {
+                System.out.println("Comparando "+h.getHabitacionNumero()+" "+r.getHabitacionId());
+                if (h.getHabitacionNumero().equals(r.getHabitacionId())) {
+                    sw = 1;
+                } 
+            }
+            if (sw != 1) {
+                disponible.add(h);
+            }
+        }
+        return disponible;
     }
 
     @ExceptionHandler(Exception.class)

@@ -2,19 +2,40 @@ package com.nathan.hotel_reservas.models;
 
 import java.sql.Date;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "HO_RESERVA")
+
 public class ReservaModel {
 
-    private int reservaId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reserva_sequence")
+    @SequenceGenerator(name = "reserva_sequence", sequenceName = "seq_reserva_id", allocationSize = 1)
+    @Column(name = "reserva_id")
+    private Long reservaId; 
+    @Column(name = "numero")
     private String habitacionId;
+    @Column(name = "inicio")
     private Date inicio;
+    @Column(name = "termino")
     private Date termino;
+    @Column(name = "cliente")
     private String cliente;
+    @Column(name = "reserva_flag")
     private int reservaFlag;
 
     public ReservaModel() {
+
     }
 
-    public ReservaModel(int reservaId, String habitacionId, Date inicio, Date termino, String cliente, int reservaFlag) {
+    public ReservaModel(Long reservaId, String habitacionId, Date inicio, Date termino, String cliente, int reservaFlag) {
         this.reservaId = reservaId;
         this.habitacionId = habitacionId;
         this.inicio = inicio;
@@ -65,12 +86,12 @@ public class ReservaModel {
     }
 
 
-    public int getReservaId() {
+    public Long getReservaId() {
         return reservaId;
     }
 
 
-    public void setReservaId(int reservaId) {
+    public void setReservaId(Long reservaId) {
         this.reservaId = reservaId;
     }
     
