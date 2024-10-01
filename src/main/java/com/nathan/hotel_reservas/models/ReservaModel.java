@@ -1,6 +1,6 @@
 package com.nathan.hotel_reservas.models;
 
-import java.sql.Date;
+import org.springframework.hateoas.RepresentationModel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,11 +9,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import java.util.Date;
 
 @Entity
 @Table(name = "HO_RESERVA")
 
-public class ReservaModel {
+public class ReservaModel extends RepresentationModel<ReservaModel> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reserva_sequence")
@@ -81,8 +82,8 @@ public class ReservaModel {
         return termino;
     }
 
-    public void setTermino(Date termino) {
-        this.termino = termino;
+    public void setTermino(Date fin) {
+        this.termino = fin;
     }
 
 

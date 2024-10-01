@@ -7,7 +7,7 @@ import com.nathan.hotel_reservas.models.ReservaModel;
 
 public interface  ReservaService {
 
-    List<ReservaModel> getAllReserva();
+    List<ReservaModel> getAllReservas();
     Optional<ReservaModel> getReservaById(Long id);
     
     ReservaModel createReserva(ReservaModel usuario);

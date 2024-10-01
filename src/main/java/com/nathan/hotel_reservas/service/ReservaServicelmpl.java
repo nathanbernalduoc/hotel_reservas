@@ -16,7 +16,7 @@ public class ReservaServicelmpl implements ReservaService {
     private ReservaRepository reservaRepository;
     
     @Override
-    public List<ReservaModel> getAllReserva() {
+    public List<ReservaModel> getAllReservas() {
         return reservaRepository.findAll();
     }
 
