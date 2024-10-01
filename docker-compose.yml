@@ -1,7 +1,7 @@
 version: '1'
 services:
   hotel_reservas:
-    buld:
+    build:
       context: .
       dockerfile: Dockerfile
     ports:
