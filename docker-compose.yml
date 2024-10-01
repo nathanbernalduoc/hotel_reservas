@@ -1,4 +1,3 @@
-version: '1'
 services:
   hotel_reservas:
     build:
@@ -10,4 +9,5 @@ services:
       - spring.datasource.url=jdbc:oracle:thin:@hkh8nor6id4iu8l4_tp?TNS_ADMIN=/app/oracle_wallet
       - spring.datasource.username=HOTEL
       - spring.datasource.password=Duoc$2024.#0211
+    command: ["java","-jar","app.jar"]
     restart: always
