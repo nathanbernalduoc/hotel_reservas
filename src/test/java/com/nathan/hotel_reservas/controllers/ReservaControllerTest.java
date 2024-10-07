@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.nathan.hotel_reservas.models.ReservaModel;
-import com.nathan.hotel_reservas.controllers.ReservaController;
 import com.nathan.hotel_reservas.service.ReservaServicelmpl;
 import com.nathan.hotel_reservas.service.HabitacionServicelmpl;
 
