@@ -1,2 +1,5 @@
-com/nathan/hotel_reservas/HotelReservasApplicationTests.class
+com/nathan/hotel_reservas/repository/HabitacionRepositoryTest.class
 com/nathan/hotel_reservas/service/ReservaServiceTest.class
+com/nathan/hotel_reservas/repository/ReservaRepositoryTest.class
+com/nathan/hotel_reservas/HotelReservasApplicationTests.class
+com/nathan/hotel_reservas/controllers/ReservaControllerTest.class
