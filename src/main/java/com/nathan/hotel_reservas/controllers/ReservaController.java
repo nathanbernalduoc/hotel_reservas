@@ -2,22 +2,22 @@ package com.nathan.hotel_reservas.controllers;
 
 import java.util.Date;
 import java.util.ArrayList;
-//import java.util.ArrayList;
+
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.nathan.hotel_reservas.models.HabitacionModel;
 import com.nathan.hotel_reservas.models.ReservaModel;
@@ -56,6 +56,30 @@ public class ReservaController {
         }
         System.out.println("Reserva coincidente "+habitacionId);
         return habitacionId;
+    }
+
+    public List<HabitacionModel> getHabitacionDisponible() {
+        List<ReservaModel> reservas = reservaService.getAllReservas();
+        List<HabitacionModel> habitaciones = habitacionService.getAllHabitacion();
+        List<HabitacionModel> habitacionDisponible = new ArrayList<HabitacionModel>();
+
+        Date ahora = new Date();
+        
+        for(HabitacionModel habitacion: habitaciones) {
+            int busy = 0;
+            for(ReservaModel reserva: reservas) {
+                if (habitacion.getHabitacionNumero().equals(reserva.getHabitacionId())) {
+                    if (!ahora.after(reserva.getInicio()) && !ahora.before(reserva.getTermino())) {
+                        busy = 0;
+                    }
+                }
+            }
+            if (busy != 1) {
+                habitacionDisponible.add(habitacion);
+            }
+        }
+
+        return habitacionDisponible;
     }
 
     // Mappings
@@ -125,36 +149,6 @@ public class ReservaController {
                 break;
             }
         }
-    }
-
-    @GetMapping("/disponibilidad")
-    public CollectionModel<EntityModel<HabitacionModel>> getDisponibilidad() {
-        List<HabitacionModel> habitaciones = habitacionService.getAllHabitacion();
-        List<HabitacionModel> disponibles = new ArrayList<HabitacionModel>();
-        List<ReservaModel> reservas = reservaService.getAllReservas();
-        for(HabitacionModel habitacion: habitaciones) {
-            int sw = 0;
-            for(ReservaModel reserva: reservas) {
-                if (habitacion.getHabitacionNumero().equals(reserva.getHabitacionId())) {
-                    sw = 1;
-                } 
-            }
-            if (sw != 1) {
-                disponibles.add(habitacion);
-            }
-        }
-
-        List<EntityModel<HabitacionModel>> disponibleResource = disponibles.stream()
-            .map(d -> EntityModel.of(d, 
-                WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass())).withSelfRel()
-                ))
-            .collect(Collectors.toList());
-
-        WebMvcLinkBuilder linkTo = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(this.getClass()).getAllReservas());
-        CollectionModel<EntityModel<HabitacionModel>> resources = CollectionModel.of(disponibleResource, linkTo.withRel("disponibildad"));
-
-        return resources;
-
     }
 
 }
