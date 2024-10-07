@@ -1,5 +1,6 @@
 #Dockerfile
-FROM openjdk:22-ea-jdk
+#FROM openjdk:22-ea-jdk
+FROM openjdk:21-ea-24-oracle
 
 # directorio de trabajo
 WORKDIR /app
